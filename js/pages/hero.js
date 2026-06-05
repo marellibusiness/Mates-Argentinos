@@ -243,21 +243,42 @@ window.PageHero = {
 
   init() {
     window.submitContactForm = () => {
-      const nombre = document.getElementById('ct_nombre')?.value.trim();
+      const nombre   = document.getElementById('ct_nombre')?.value.trim();
       const apellido = document.getElementById('ct_apellido')?.value.trim();
-      const email = document.getElementById('ct_email')?.value.trim();
-      const mensaje = document.getElementById('ct_mensaje')?.value.trim();
-      if (!nombre || !apellido || !email || !mensaje) return;
+      const email    = document.getElementById('ct_email')?.value.trim();
+      const telefono = document.getElementById('ct_telefono')?.value.trim();
+      const mensaje  = document.getElementById('ct_mensaje')?.value.trim();
+
+      if (!nombre || !apellido) {
+        window.store.emit('error', 'Por favor completá tu nombre y apellido.');
+        return;
+      }
+      if (!telefono) {
+        window.store.emit('error', 'Por favor ingresá tu número de teléfono.');
+        return;
+      }
+      if (!mensaje) {
+        window.store.emit('error', 'Por favor escribí tu mensaje.');
+        return;
+      }
+
+      const whatsappNumber = '5493415486390';
+      const text = [
+        '📋 *Nueva consulta desde el sitio web*',
+        '',
+        `👤 *Nombre:* ${nombre} ${apellido}`,
+        email    ? `📧 *Email:* ${email}` : '',
+        `📞 *Teléfono:* ${telefono}`,
+        '',
+        `💬 *Mensaje:*`,
+        mensaje,
+      ].filter(line => line !== null && line !== undefined).join('\n');
+
+      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
 
       const form = document.getElementById('contact-form');
-      const btn = form?.querySelector('button[type="submit"]');
-      if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
-
-      setTimeout(() => {
-        window.store.emit('success', '¡Consulta enviada! Te contactamos a la brevedad.');
-        if (form) form.reset();
-        if (btn) { btn.textContent = 'Enviar Consulta'; btn.disabled = false; }
-      }, 800);
+      if (form) form.reset();
     };
   }
 };
